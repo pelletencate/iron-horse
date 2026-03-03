@@ -1,22 +1,44 @@
 # Iron Horse — OpenCode Plugin + Skill Pack for Rails 8
 
-> Deep Rails 8 domain intelligence layered on top of [Superpowers](https://github.com/obra/superpowers) process workflows.
+> Deep Rails 8 domain intelligence for AI coding agents.
 
 ## What This Is
 
 Iron Horse is an OpenCode plugin and skill pack that gives AI agents deep Rails 8 domain knowledge. It ships 23 domain skills covering everything from migrations to WebSockets, plus a bootstrap plugin that loads core context at session start.
 
-Superpowers handles the process layer (TDD methodology, debugging loops, code review, planning). Iron Horse handles the domain layer — the Rails-specific patterns, conventions, and gotchas that generic models don't know well.
+Your agent harness (oh-my-opencode, Superpowers, or any compatible process layer) handles orchestration, TDD, debugging loops, and planning. Iron Horse handles the domain layer — the Rails-specific patterns, conventions, and gotchas that generic models don't know well.
 
 ## Quick Install
 
 ```sh
-git clone https://github.com/your-org/iron-horse.git
-cd iron-horse
-bash install.sh
+bunx iron-horse install
 ```
 
-`install.sh` clones Superpowers, symlinks the plugin into your OpenCode plugins directory, and symlinks all skills into your OpenCode skills directory. After install, OpenCode loads `using-iron-horse` automatically at every session start.
+That's it. This adds two entries to your `opencode.json`:
+
+- `"iron-horse"` in the `plugin` array (bootstrap prompt injection)
+- A `skills.urls` entry pointing to the skill catalog on GitHub (23 on-demand skills)
+
+After install, OpenCode loads `using-iron-horse` automatically at every session start.
+
+### Manual install
+
+If you prefer, add these to your `opencode.json` by hand:
+
+```json
+{
+  "plugin": ["iron-horse"],
+  "skills": {
+    "urls": ["https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/"]
+  }
+}
+```
+
+### Uninstall
+
+```sh
+bunx iron-horse uninstall
+```
 
 ## Default Stack
 
@@ -38,7 +60,7 @@ Iron Horse assumes this stack unless you say otherwise:
 
 1. **Session start** — the `using-iron-horse` plugin bootstraps core Rails domain context automatically.
 2. **On-demand skills** — individual skills load via OpenCode's native `skill` tool (e.g., `skill("hotwire")`). Each skill provides deep, focused guidance for its domain.
-3. **Process layer** — Superpowers handles TDD, debugging loops, code review, and planning workflows. Iron Horse skills slot in alongside Superpowers, not replacing it.
+3. **Process layer** — your agent harness (oh-my-opencode, Superpowers, or similar) handles TDD, debugging loops, code review, and planning workflows. Iron Horse skills slot in alongside it, not replacing it.
 
 ## Skill Catalog
 

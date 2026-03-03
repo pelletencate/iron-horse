@@ -5,29 +5,24 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function extractAndStripFrontmatter(content) {
-  // strip YAML frontmatter between --- delimiters
+function stripFrontmatter(content) {
   return content.replace(/^---[\s\S]*?---\n/, '');
 }
 
 function getBootstrapContent() {
   const skillPath = join(__dirname, '../../skills/using-iron-horse/SKILL.md');
   const raw = readFileSync(skillPath, 'utf8');
-  return extractAndStripFrontmatter(raw);
+  return stripFrontmatter(raw);
 }
 
 export default function IronHorsePlugin({ client, directory }) {
   return {
-    experimental: {
-      chat: {
-        system: {
-          transform: async (output) => {
-            const content = getBootstrapContent();
-            (output.system ||= []).push({ type: 'text', text: content });
-            return output;
-          }
-        }
-      }
-    }
+    name: 'iron-horse',
+    hooks: {
+      'experimental.chat.system.transform': async (input, output) => {
+        const content = getBootstrapContent();
+        output.system.push(content);
+      },
+    },
   };
 }
