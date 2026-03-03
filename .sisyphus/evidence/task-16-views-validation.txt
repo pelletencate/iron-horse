@@ -1,0 +1,12 @@
+frontmatter ok
+name ok
+description ok
+triggers ok
+line count: 382
+line count ok
+0
+no namespace prefix ok
+0
+no superpowers block ok
+0
+no allowed-tools ok
