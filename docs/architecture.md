@@ -1,10 +1,10 @@
-# Architecture: Orchestration Layer
+# Architecture: Two-Layer Design
 
-> Living document. Last updated: 2026-03-01
+> Living document. Last updated: 2026-03-03
 
 ## Overview
 
-The system has a two-tier execution model designed to match the shape of the work:
+rails-ai uses a two-layer architecture that separates **process** from **domain**:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -14,59 +14,170 @@ The system has a two-tier execution model designed to match the shape of the wor
                    │
                    ▼
 ┌─────────────────────────────────────────────┐
-│              Router / Classifier            │
-│   Decides: big feature or small task?       │
-└────────┬────────────────────────┬───────────┘
-         │                        │
-         ▼                        ▼
-┌─────────────────┐    ┌─────────────────────┐
-│    Planner +    │    │     Executor        │
-│  Orchestrator   │    │  (direct action)    │
-│                 │    │                     │
-│ - Decompose     │    │ - Read/write code   │
-│ - Phase plan    │    │ - Run tests         │
-│ - Delegate      │    │ - Apply skills      │
-│ - Track progress│    │ - Delegate research │
-│ - Validate      │    │   or deep-think     │
-└────────┬────────┘    └─────────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Executor Pool  │
-│  (sub-agents)   │
-│                 │
-│ One per phase/  │
-│ task in the plan│
-└─────────────────┘
+│           Superpowers Layer                 │
+│          (process skills)                   │
+│                                             │
+│  - Brainstorming & discovery                │
+│  - Plan writing & execution                 │
+│  - TDD methodology                          │
+│  - Systematic debugging                     │
+│  - Code review                              │
+│  - Subagent orchestration                   │
+│  - Verification before completion           │
+└──────────────────┬──────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────┐
+│          rails-ai Domain Layer              │
+│          (domain skills)                    │
+│                                             │
+│  - Rails 8 conventions & patterns           │
+│  - Model / controller / view knowledge      │
+│  - Testing patterns (Minitest, RSpec)        │
+│  - Hotwire / Stimulus / Turbo               │
+│  - Authentication & authorization           │
+│  - Plugin bootstrap (rails-ai.js)           │
+└─────────────────────────────────────────────┘
 ```
+
+The key insight: **Superpowers already solves orchestration, planning, debugging, and verification.** We do not rebuild any of that. rails-ai focuses purely on encoding Rails domain knowledge as skills.
 
 ---
 
-## Tier 1: Planner + Orchestrator
+## Superpowers Layer (Process)
 
-For multi-step features that span models, controllers, views, migrations, tests, etc.
+[Superpowers](https://github.com/obra/superpowers) provides process-level capabilities that are framework-agnostic. These include:
 
-### Planner Responsibilities
+| Capability | Superpowers Skill | What It Does |
+|------------|-------------------|--------------|
+| **Planning** | `writing-plans` | Decomposes large features into phased plans |
+| **Orchestration** | `subagent-driven-development` | Spawns focused sub-agents for plan phases |
+| **Brainstorming** | `brainstorming` | Agent-driven discovery and requirements gathering |
+| **TDD** | `tdd` | Test-driven development methodology |
+| **Debugging** | `systematic-debugging` | Structured approach to finding and fixing bugs |
+| **Code Review** | `code-review` | Review process with verification |
+| **Verification** | `verification-before-completion` | Ensures work is actually complete before declaring done |
 
-1. **Analyze the request** - Understand scope, affected layers, dependencies
-2. **Survey the codebase** - Read relevant files, schema, routes, existing patterns
-3. **Decompose into phases** - Ordered steps with clear inputs/outputs
-4. **Identify risks** - Breaking changes, data migrations, dependency conflicts
+**We do NOT rebuild any of this.** Superpowers handles:
+- Deciding when to plan vs. execute directly
+- Breaking work into phases
+- Spawning sub-agents for phases
+- Tracking plan state across execution
+- Failure handling (retry, debug, ask user)
+- Verifying completeness
 
-### Convention-Lean Planning
+---
 
-Plans must be **minimal**. Rails convention eliminates the need to spell out standard patterns. The planner should:
+## rails-ai Domain Layer
 
-- **Omit anything the executor already knows** (CRUD, RESTful routing, migration syntax, model boilerplate)
+rails-ai adds **Rails-specific domain knowledge** as skills that compose with Superpowers' process skills. When Superpowers plans a feature, it uses rails-ai skills to understand *how* Rails does things. When it debugs, it uses rails-ai skills to understand Rails-specific error patterns.
+
+### What rails-ai Provides
+
+1. **Skills** — Markdown-based knowledge packages (see [Skills Spec](../specs/skills.md))
+   - Rails 8 conventions, patterns, and best practices
+   - Adapted from community knowledge + original content
+   - Loaded via OpenCode's native `skill` tool
+
+2. **Plugin bootstrap** — `rails-ai.js` (see [Plugins Spec](../specs/plugins.md))
+   - Injects `using-rails-ai/SKILL.md` into system prompt at session start
+   - Gives the agent baseline Rails awareness before any explicit skill loading
+
+3. **Installation** — `install.sh` script
+   - Symlinks plugin and skills into OpenCode's config directory
+   - No `opencode.json` needed
+
+---
+
+## Plugin Bootstrap Mechanism
+
+The `rails-ai.js` plugin uses OpenCode's `experimental.chat.system.transform` hook to inject Rails context at session start:
+
+```
+Session starts
+    │
+    ▼
+rails-ai.js plugin fires (system.transform hook)
+    │
+    ▼
+Reads using-rails-ai/SKILL.md from skills directory
+    │
+    ▼
+Strips YAML frontmatter
+    │
+    ▼
+Pushes content to output.system
+    │
+    ▼
+Agent now has Rails baseline knowledge
+```
+
+The plugin does **not**:
+- Auto-load all skills (that's what the `skill` tool is for)
+- Define custom tools
+- Modify agent behavior beyond injecting context
+
+---
+
+## Skill Discovery & Priority
+
+Skills are discovered via the filesystem. OpenCode's native `skill` tool finds them based on symlinked directories.
+
+**Priority order** (highest wins):
+
+| Priority | Location | Example |
+|----------|----------|---------|
+| 1. Project | `.opencode/skills/` in project root | Project-specific conventions |
+| 2. Personal | `~/.config/opencode/skills/` | User preferences |
+| 3. Superpowers | `~/.config/opencode/skills/superpowers/` (symlinked) | Process skills |
+| 4. rails-ai | `~/.config/opencode/skills/rails-ai/` (symlinked) | Domain skills |
+
+If a project defines a skill with the same name as a rails-ai skill, the project's version wins. This means projects can override any rails-ai advice with their own conventions.
+
+---
+
+## How They Compose
+
+Superpowers process skills and rails-ai domain skills work **independently** — there is no hard coupling between them.
+
+**Example: Adding a multi-tenant system**
+
+```
+User: "Add a multi-tenant system with subdomain routing"
+
+1. Superpowers' writing-plans skill activates
+   → Decomposes into phases (tenant model, routing, scoping, tests)
+   → Plan is terse: "what" not "how" (Convention Over Specification)
+
+2. Superpowers' subagent-driven-development spawns phase agents
+
+3. Each phase agent uses rails-ai domain skills:
+   → rails-model skill: knows about Current attributes pattern
+   → rails-testing skill: knows Minitest conventions
+   → Agent's baseline Rails knowledge (from bootstrap plugin)
+
+4. Superpowers' verification-before-completion checks work
+   → Tests pass, code quality verified
+
+5. Done
+```
+
+Neither layer knows about the other's internals. Superpowers doesn't know it's working on Rails; rails-ai doesn't know Superpowers is orchestrating.
+
+---
+
+## Convention-Lean Planning
+
+Plans must be **minimal**. Rails convention eliminates the need to spell out standard patterns. Whether written by a human or by Superpowers' `writing-plans` skill, plans should:
+
+- **Omit anything the agent already knows** (CRUD, RESTful routing, migration syntax, model boilerplate)
 - **Only specify deviations** from convention and project-specific design decisions
-- **Trust the executor's Rails knowledge** -- each phase is a "what", not a "how"
+- **Trust the agent's Rails knowledge** — each phase is a "what", not a "how"
 - **Treat phases as intentions** with constraints, not step-by-step instructions
 
 A plan phase is essentially: *"Do X, but be aware of Y."*
 
-### Plan Structure
-
-Plans are intentionally terse. The executor fills in the Rails knowledge.
+### Example: Convention-Lean Plan
 
 ```yaml
 plan:
@@ -84,7 +195,6 @@ plan:
 
     - id: 3
       name: "Query scoping"
-      type: research_then_execute
       depends_on: [1, 2]
       notes: "Use Current attributes pattern. Add tenant_id FK to all tenant-scoped models. Concern for default_scope vs explicit scoping -- research tradeoffs."
 
@@ -94,134 +204,37 @@ plan:
       notes: "Ensure tenant isolation. Test subdomain resolution. Test scoping doesn't leak."
 ```
 
-Notice: no mention of `rails generate`, `validates`, `add_index`, migration syntax, or any other Rails boilerplate. The executor knows all of that.
-
-### Orchestrator Responsibilities
-
-1. **Execute phases in order** - Respect `depends_on` relationships
-2. **Spawn executor agents** - One per phase/task
-3. **Pass context forward** - Each phase gets results from its dependencies
-4. **Validate between phases** - Run validation step before proceeding
-5. **Handle failures** - Retry, rollback, or ask user for guidance
-6. **Report progress** - Stream status updates to user
-
-### Failure Handling
-
-| Scenario | Strategy |
-|----------|----------|
-| Validation fails | Retry phase with error context (max 2 retries) |
-| Phase produces unexpected output | Pause and ask user |
-| Dependency conflict between phases | Re-plan from the conflicting phase |
-| Test failures | Analyze, fix, re-run (up to 3 attempts) |
+Notice: no mention of `rails generate`, `validates`, `add_index`, migration syntax, or any other Rails boilerplate. The agent knows all of that.
 
 ---
 
-## Tier 2: Executor
+## Architecture Decision Tree
 
-The workhorse. Handles direct code changes for small tasks, or acts as the hands of the orchestrator for individual phases.
-
-### Capabilities
-
-- Read and write files
-- Run shell commands (tests, migrations, linters)
-- Apply skills (load and follow skill instructions)
-- Use plugins (invoke plugin capabilities)
-- **Delegate to sub-agents** for specific needs:
-
-### Executor Delegation
-
-The executor is not just a dumb code writer. It can spin up focused sub-agents:
-
-| Sub-agent Type | Purpose | Example |
-|----------------|---------|---------|
-| **Research** | Deep codebase exploration, gem docs, pattern analysis | "How does Devise integrate with this app?" |
-| **Deep Think** | Complex problem solving, architecture decisions | "What's the best way to handle polymorphic tenant ownership?" |
-| **Verify** | Run tests, check linting, validate schema | "Do all specs pass after this change?" |
+When working on a target Rails project, the agent follows this decision tree:
 
 ```
-┌──────────────────────────────┐
-│          Executor            │
-│                              │
-│  "Add caching to User model" │
-│                              │
-│  1. Read user.rb             │
-│  2. Hmm, complex caching... │
-│     ┌──────────────────┐     │
-│     │ Research Agent    │     │
-│     │ "What caching     │     │
-│     │  strategy does    │     │
-│     │  this app use?"   │     │
-│     └──────┬───────────┘     │
-│            │ "Redis + Rails  │
-│            │  fragment cache" │
-│  3. Apply caching pattern    │
-│  4. Write test               │
-│     ┌──────────────────┐     │
-│     │ Verify Agent      │     │
-│     │ "Run affected     │     │
-│     │  specs"           │     │
-│     └──────┬───────────���     │
-│            │ "All green"     │
-│  5. Done                     │
-└──────────────────────────────┘
+Is there a project AGENTS.md?
+├── Yes → Read it for deviations from default stack
+│         (only deviations are documented)
+└── No  → Use all defaults (Rails 8, Hotwire, SQLite, Minitest, etc.)
+
+Is there a using-rails-ai/ directory in the project?
+├── Yes → Project has custom rails-ai configuration
+└── No  → Use standard rails-ai skills
+
+Does the task need planning?
+├── Yes → Superpowers' writing-plans + subagent-driven-development handle it
+└── No  → Agent executes directly, using rails-ai skills as needed
 ```
-
----
-
-## Router / Classifier
-
-Decides which tier handles a request. Heuristics:
-
-### Routes to Orchestrator (Planner)
-- Request mentions multiple models/tables
-- Involves new migrations + controllers + views
-- Keywords: "feature", "system", "module", "workflow"
-- Estimated file changes > 5
-- Cross-cutting concerns (auth, multi-tenancy, permissions)
-
-### Routes to Executor (Direct)
-- Single model/file changes
-- Bug fixes with clear scope
-- Adding methods, scopes, validations
-- Writing or fixing specific tests
-- Refactoring within a single file/class
-
-### Ambiguous Cases
-- Ask the user: "This looks like it could be a quick change or a larger feature. Should I plan it out or jump straight in?"
-
----
-
-## Context Management
-
-### What context is passed to each agent
-
-| Agent | Context |
-|-------|---------|
-| Planner | Full user request, project structure, schema, routes, relevant models |
-| Orchestrator | Plan document, phase results so far |
-| Executor (standalone) | User request, relevant files, detected conventions |
-| Executor (in plan) | Phase spec, dependency outputs, relevant files |
-| Research sub-agent | Specific question, relevant file paths, codebase access |
-| Deep Think sub-agent | Problem statement, constraints, options discovered |
 
 ---
 
 ## Default Stack & AGENTS.md
 
-All agents assume a **default stack** (see [PRD - Default Stack](./PRD.md#default-stack)). When working with a target Rails project:
+All agents assume a **default stack** (see [PRD — Default Stack](./PRD.md#default-stack)). When working with a target Rails project:
 
 - The agent reads the project's `AGENTS.md` for deviations from the default
 - If no `AGENTS.md` exists, all defaults apply
-- `AGENTS.md` should be minimal -- only listing what's different
+- `AGENTS.md` should be minimal — only listing what's different
 
-This means the planner and executor don't need to be told "use Minitest" or "use Hotwire" -- those are assumed. Only deviations like `Database: PostgreSQL` or `Testing: RSpec` need to be stated.
-
----
-
-## Open Design Questions
-
-- [ ] Should the planner be a separate model call or same model with different system prompt?
-- [ ] How to persist plan state across opencode sessions?
-- [ ] Should we use opencode's native Task tool for sub-agents or build our own?
-- [ ] How to handle long-running plans that span multiple user interactions?
-- [ ] Should the router classification be LLM-based or heuristic-based?
+This means the agent doesn't need to be told "use Minitest" or "use Hotwire" — those are assumed. Only deviations like `Database: PostgreSQL` or `Testing: RSpec` need to be stated.

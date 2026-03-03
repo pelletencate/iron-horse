@@ -1,27 +1,27 @@
 # Rails AI Workspace - Product Requirements Document
 
-> Living document. Last updated: 2026-03-01
+> Living document. Last updated: 2026-03-03
 
 ## Vision
 
-An opencode workspace purpose-built for Ruby on Rails development. It combines a planner/orchestrator for large features with a highly capable executor for smaller tasks, backed by Rails-specific skills and plugins.
+An opencode workspace purpose-built for Ruby on Rails development. It layers Rails-specific domain knowledge (skills + plugin) on top of [Superpowers](https://github.com/obra/superpowers)' process capabilities (planning, orchestration, debugging, verification).
 
 ## Goals
 
 - **Rails-native intelligence**: Deep understanding of Rails conventions, patterns, and ecosystem
-- **Two-tier task execution**: Orchestrated planning for big features, fast execution for small tasks
 - **Composable skills**: Modular, reusable skills that encode Rails best practices
-- **Plugin ecosystem**: Extensible plugins for common Rails workflows
+- **Superpowers integration**: Leverage existing process layer — planning, orchestration, TDD, debugging — without rebuilding it
+- **Convention over specification**: Plans are terse because Rails conventions eliminate boilerplate
 
 ## Core Principle: Convention Over Specification
 
-Rails lives by "convention over configuration" -- our planning should too. Because both the agent and Rails share a deep understanding of standard patterns, plans should be **short, sparse, and focused on what's non-obvious**.
+Rails lives by "convention over configuration" — our planning should too. Because both the agent and Rails share a deep understanding of standard patterns, plans should be **short, sparse, and focused on what's non-obvious**.
 
 **What this means in practice:**
 
 - Plans should NOT describe standard Rails patterns (RESTful routes, model validations, migration syntax)
 - Plans should only specify **deviations** from convention, **project-specific decisions**, and **non-obvious requirements**
-- A phase like "Create User model with name, email" needs zero implementation detail -- Rails conventions handle the rest
+- A phase like "Create User model with name, email" needs zero implementation detail — Rails conventions handle the rest
 - A phase like "Create multi-tenant scoping with Current attributes" needs detail because the approach is a design decision
 
 **Anti-pattern (too verbose):**
@@ -39,11 +39,11 @@ Phase 1: User model (name, email)
 - email: unique, required
 ```
 
-Everything else is implied by Rails convention. The executor already knows how to create a model.
+Everything else is implied by Rails convention. The agent already knows how to create a model.
 
 ## Default Stack
 
-The workspace assumes a **default stack** unless the project's `AGENTS.md` says otherwise. This keeps project docs short -- only deviations need documenting.
+The workspace assumes a **default stack** unless the project's `AGENTS.md` says otherwise. This keeps project docs short — only deviations need documenting.
 
 | Layer | Default | Notes |
 |-------|---------|-------|
@@ -67,42 +67,59 @@ The workspace assumes a **default stack** unless the project's `AGENTS.md` says 
 
 ## Core Concepts
 
-### 1. Orchestration Layer
+### 1. Plugin: `rails-ai.js` Bootstrap
 
-Two distinct modes of operation:
+The plugin is the entry point that gives the agent Rails awareness. It uses OpenCode's `experimental.chat.system.transform` hook to inject the `using-rails-ai/SKILL.md` content into the system prompt at session start.
 
-| Mode | Trigger | Description |
-|------|---------|-------------|
-| **Planner + Orchestrator** | Multi-file features, migrations, large refactors | Breaks work into phases, delegates to executor agents, tracks progress |
-| **Executor** | Single-file changes, bug fixes, quick tasks | Direct execution with ability to delegate research or deep-think subtasks |
+- **What it does**: Reads the bootstrap skill, strips YAML frontmatter, pushes content to `output.system`
+- **What it does NOT do**: Auto-load all skills, define custom tools, or modify agent behavior beyond context injection
+- **Installation**: `install.sh` symlinks the plugin into `~/.config/opencode/plugins/`
 
-See [Architecture](./architecture.md) for details.
+See [Plugins Spec](../specs/plugins.md) for implementation details.
 
-### 2. Skills
+### 2. Skills: Domain Knowledge
 
-Packaged knowledge about Rails patterns. Each skill is a folder with a `SKILL.md` and optional scripts/examples. See [Skills Spec](../specs/skills.md) for the format definition. Specific skills will be added as we identify concrete needs.
+Skills are packaged units of Rails knowledge — markdown files that teach the agent how to perform specific tasks correctly. They encode best practices, conventions, and decision trees.
 
-### 3. Plugins
+- **Format**: Directory with `SKILL.md` + optional examples/scripts (see [Skills Spec](../specs/skills.md))
+- **Discovery**: Filesystem-based via OpenCode's native `skill` tool
+- **Priority**: Project skills > Personal skills > Superpowers skills > rails-ai skills
+- **Content**: Mix of adapted community knowledge and original content
 
-Runtime extensions that add executable capabilities (as opposed to skills which are knowledge). See [Plugins Spec](../specs/plugins.md) for the format definition. Specific plugins will be added as we identify concrete needs.
+### 3. Superpowers Integration: Process Layer
+
+[Superpowers](https://github.com/obra/superpowers) provides the process layer — everything about *how* to work. rails-ai provides the domain layer — everything about *what* Rails convention expects.
+
+| Superpowers Provides | rails-ai Provides |
+|----------------------|-------------------|
+| Planning & decomposition | Rails conventions & patterns |
+| Sub-agent orchestration | Model/controller/view knowledge |
+| TDD methodology | Testing patterns (Minitest, RSpec) |
+| Systematic debugging | Rails-specific error patterns |
+| Code review process | Hotwire / Stimulus / Turbo guidance |
+| Verification before completion | Authentication & authorization patterns |
+
+The two layers compose without hard coupling. Superpowers doesn't know it's working on Rails; rails-ai doesn't know Superpowers is orchestrating.
+
+See [Architecture](./architecture.md) for the full two-layer design.
 
 ---
 
 ## User Workflows
 
-### Big Feature (Orchestrated)
+### Big Feature (Superpowers-Orchestrated)
 
 ```
 User: "Add a multi-tenant system with subdomain routing"
 
-1. Planner analyzes the request
-2. Breaks into phases:
+1. Superpowers' writing-plans skill decomposes into phases:
    - Phase 1: Tenant model + migration
    - Phase 2: Subdomain routing middleware
    - Phase 3: Scoping queries to current tenant
    - Phase 4: Tests
-3. Orchestrator executes each phase via executor agents
-4. Progress tracked, results validated between phases
+2. Superpowers' subagent-driven-development executes each phase
+3. Each phase agent uses rails-ai skills for Rails-specific guidance
+4. Superpowers' verification-before-completion validates the result
 ```
 
 ### Small Task (Direct Execution)
@@ -110,21 +127,21 @@ User: "Add a multi-tenant system with subdomain routing"
 ```
 User: "Add a cached_full_name method to the User model"
 
-1. Executor reads User model
+1. Agent reads User model
 2. Adds method with memoization
 3. Adds corresponding test
 4. Done
 ```
 
-### Small Task with Research Delegation
+### Debugging (Superpowers Process + rails-ai Domain)
 
 ```
 User: "Why is this N+1 happening in the orders index?"
 
-1. Executor identifies the query pattern
-2. Delegates deep analysis to a research subtask
-3. Research agent traces the eager loading chain
-4. Executor applies the fix (includes/preload)
+1. Superpowers' systematic-debugging skill structures the investigation
+2. Agent uses Rails knowledge to identify eager loading patterns
+3. Traces the query chain, applies fix (includes/preload)
+4. Superpowers' verification-before-completion confirms fix works
 ```
 
 ---
@@ -139,13 +156,21 @@ User: "Why is this N+1 happening in the orders index?"
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-- [ ] How should the orchestrator handle failures mid-plan?
-- [ ] Should skills be versioned per Rails version (6, 7, 8)?
-- [ ] How to detect and adapt to project-specific conventions (RSpec vs Minitest, etc.)?
-- [ ] Should there be a "dry run" mode for the orchestrator?
-- [ ] How to handle gems that change Rails behavior (Devise, Pundit, etc.)?
+These questions from the original design have been resolved by adopting Superpowers:
+
+| Question | Resolution |
+|----------|------------|
+| How should the orchestrator handle failures mid-plan? | Superpowers' `systematic-debugging` + `verification-before-completion` skills handle this. Retry, debug, or ask user. |
+| Should skills be versioned per Rails version (6, 7, 8)? | Not for v1. Skills target Rails 8. Version-specific skills can be added in v2 if needed. |
+| How to detect and adapt to project-specific conventions? | The Skill Adaptation pattern in [Skills Spec](../specs/skills.md) — skills include decision trees that inspect the project. |
+| Should there be a "dry run" mode for the orchestrator? | Not for v1. Superpowers' planning phase serves as a preview; execution can be paused between phases. |
+| How to handle gems that change Rails behavior? | Skills include gem-aware decision trees (e.g., "if Devise is present, do X; otherwise use has_secure_password"). |
+| How should the planner work? | Superpowers' `writing-plans` skill handles plan creation. |
+| How to persist plan state across sessions? | Superpowers handles plan state management. |
+| How to handle sub-agents? | Superpowers' `subagent-driven-development` skill manages sub-agent spawning. |
+| Should routing be LLM-based or heuristic-based? | Superpowers handles task routing — we don't need a custom router. |
 
 ---
 

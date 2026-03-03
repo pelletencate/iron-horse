@@ -1,46 +1,115 @@
 # Plugins Specification
 
-> Living document. Last updated: 2026-03-01
+> Living document. Last updated: 2026-03-03
 
 ## What is a Plugin?
 
-A plugin extends the agent's runtime capabilities. While skills teach *how* to do something, plugins provide *tools* to do it -- actual executable functionality the agent can invoke.
+In the rails-ai context, a plugin is a JavaScript ES module that uses OpenCode's plugin hooks to inject context or modify behavior at runtime. The primary plugin is `rails-ai.js`, which bootstraps Rails awareness into the agent's system prompt.
 
 ## Plugin vs Skill
 
 | Aspect | Skill | Plugin |
 |--------|-------|--------|
-| Nature | Instructions (knowledge) | Executable (tools) |
-| Format | Markdown + examples | Scripts + config |
-| Invocation | Loaded into context | Called as tool |
-| Output | Guides agent behavior | Returns data/results |
-| Example | "How to write a migration" | "Parse schema.rb and return table definitions" |
+| Nature | Knowledge (markdown) | Runtime code (JavaScript) |
+| Format | `SKILL.md` + examples | `.js` ES module |
+| Invocation | Loaded via `skill` tool on demand | Fires automatically via hooks |
+| Output | Guides agent behavior when loaded | Injects context at session start |
+| Example | "How to write a Rails migration" | "Inject Rails baseline knowledge into system prompt" |
 
-## Plugin Structure
+## The rails-ai Plugin
 
-Each plugin is a directory under `plugins/`:
+### File Location
 
 ```
-plugins/
-└── <plugin-name>/
-    ├── PLUGIN.md         # Plugin description, capabilities, usage
-    ├── scripts/          # Executable scripts
-    └── config.yaml       # Plugin configuration (optional)
+.opencode/plugins/rails-ai.js
 ```
 
-## Plugin Invocation
+Installed via symlink to `~/.config/opencode/plugins/rails-ai.js`.
 
-Plugins are invoked by the executor via shell commands. The agent:
+### Hook: `experimental.chat.system.transform`
 
-1. Reads `PLUGIN.md` to understand available capabilities
-2. Calls the relevant script with appropriate arguments
-3. Parses the output (JSON or structured text)
-4. Uses the result to inform its next action
+The plugin registers a single hook — `experimental.chat.system.transform` — which fires when a chat session starts and allows modifying the system prompt.
 
-## Open Questions
+### What It Does
 
-- [ ] Should plugins be installable from a registry?
-- [ ] How to handle plugins that need gems not in the project's Gemfile?
-- [ ] Should plugins run in a sandboxed environment?
-- [ ] How to compose plugins (e.g., analyze -> refactor -> test)?
-- [ ] Should plugins have a standard output format?
+1. Locates the `using-rails-ai/SKILL.md` file in the skills directory
+2. Reads the file content
+3. Strips YAML frontmatter (the `---` delimited header)
+4. Pushes the remaining content to `output.system`
+
+This gives the agent baseline Rails awareness before any explicit skill loading occurs.
+
+### What It Does NOT Do
+
+- **Does not auto-load all skills** — only the bootstrap skill (`using-rails-ai/SKILL.md`) is injected. Other skills are loaded on-demand via OpenCode's native `skill` tool.
+- **Does not define custom tools** — the plugin only injects context; it doesn't add new tools or commands.
+- **Does not modify agent behavior** beyond injecting the bootstrap content into the system prompt.
+
+### Implementation Pattern
+
+The plugin follows the same pattern as the [Superpowers plugin](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js):
+
+```javascript
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const RailsAIPlugin = async ({ client, directory }) => {
+  // Locate using-rails-ai/SKILL.md
+  // Read and strip frontmatter
+  // Return hook registration
+
+  return {
+    name: "rails-ai",
+    hooks: {
+      "experimental.chat.system.transform": async (input, output) => {
+        // Push bootstrap content to output.system
+      }
+    }
+  };
+};
+```
+
+## Plugin Discovery
+
+OpenCode discovers plugins from the filesystem:
+
+```
+~/.config/opencode/plugins/
+├── superpowers.js    → symlink to superpowers repo
+└── rails-ai.js      → symlink to rails-ai repo
+```
+
+Plugins are JavaScript ES modules that export an async factory function.
+
+## Installation
+
+The `install.sh` script handles plugin installation:
+
+1. Symlinks `rails-ai.js` into `~/.config/opencode/plugins/`
+2. Symlinks the `skills/` directory into `~/.config/opencode/skills/rails-ai/`
+3. No `opencode.json` configuration file is needed
+
+```bash
+# What install.sh does:
+mkdir -p ~/.config/opencode/plugins
+ln -s /path/to/rails-ai/.opencode/plugins/rails-ai.js ~/.config/opencode/plugins/rails-ai.js
+
+mkdir -p ~/.config/opencode/skills
+ln -s /path/to/rails-ai/skills ~/.config/opencode/skills/rails-ai
+```
+
+## Relationship to Superpowers Plugin
+
+rails-ai's plugin follows the same architecture as Superpowers' plugin:
+
+| Aspect | Superpowers Plugin | rails-ai Plugin |
+|--------|-------------------|-----------------|
+| Bootstrap skill | `using-superpowers/SKILL.md` | `using-rails-ai/SKILL.md` |
+| Hook | `experimental.chat.system.transform` | `experimental.chat.system.transform` |
+| Skills directory | `~/.config/opencode/skills/superpowers/` | `~/.config/opencode/skills/rails-ai/` |
+| Purpose | Process awareness | Rails domain awareness |
+
+Both plugins can run simultaneously — they each inject their own context into the system prompt.
