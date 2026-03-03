@@ -1,0 +1,9 @@
+frontmatter ok
+name ok
+description ok
+XY keyword ok
+5 whys ok
+line count: 385
+line count ok
+0
+no allowed-tools ok
