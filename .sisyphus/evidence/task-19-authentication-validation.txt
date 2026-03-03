@@ -1,0 +1,14 @@
+frontmatter ok
+name ok
+description ok
+0
+no allowed-tools ok
+line count: 400
+line count ok
+auth content ok
+oauth enrichment ok
+section: when-to-use ok
+section: principles ok
+section: gotchas ok
+section: validation ok
+triggers ok
