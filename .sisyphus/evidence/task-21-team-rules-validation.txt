@@ -1,0 +1,8 @@
+file exists
+rule count: 22
+min rules ok
+max rules ok
+404 rule ok
+dependency rule ok
+0
+no agent-routing ok
