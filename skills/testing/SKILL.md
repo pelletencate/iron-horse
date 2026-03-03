@@ -60,30 +60,14 @@ Base classes by test type:
 ## Assertions
 
 ```ruby
-# Equality & boolean
 assert_equal 4, 2 + 2
-refute_equal 5, 2 + 2
 assert_nil nil
-refute_nil "something"
-
-# Collections
-assert_empty []
 assert_includes [1, 2, 3], 2
-
-# Exceptions
 assert_raises(ArgumentError) { raise ArgumentError }
-
-# Database changes
 assert_difference "Feedback.count", 1 do
   Feedback.create!(content: "Valid content", recipient_email: "test@example.com")
 end
-assert_no_difference "Feedback.count" do
-  Feedback.new(content: nil).save
-end
-
-# Pattern matching & types
 assert_match /hello/, "hello world"
-assert_instance_of String, "hello"
 ```
 
 ## Model Testing
@@ -358,14 +342,6 @@ module TestHelpers::ApiHelpers
 end
 ```
 
-Time manipulation — prefer `travel_to` over stubbing:
-
-```ruby
-travel_to Time.zone.local(2024, 10, 29, 12, 0, 0) do
-  assert_equal 2024, Time.current.year
-end
-```
-
 ## Running Tests
 
 ```bash
@@ -375,14 +351,36 @@ rails test test/models/feedback_test.rb:12  # by line number
 rails test -n /validation/             # pattern match
 ```
 
+## Phase-Locked TDD Discipline
+
+Strict phase separation prevents thrashing:
+
+**Red phase** (writing failing tests):
+- NEVER modify `app/` code — only write/edit spec files
+- Run specs frequently; stop when you have a clean failing test
+- One failing test at a time
+
+**Green phase** (making tests pass):
+- Write MINIMUM code to pass the failing test
+- NEVER modify `spec/` during green phase
+- Stop immediately on first red — don't accumulate failures
+
+**Refactor phase**:
+- NEVER modify `spec/` — stop on first red and revert
+- Use `flog` / `flay` metrics to identify refactor targets:
+  `flog app/models/post.rb` — score >20 per method needs attention
+  `flay app/` — finds structural duplication
+
+Phase violations cause context switching and obscure bugs.
+
 ## Gotchas
 
-- **Forgetting `mock.verify`** — mock expectations silently pass without it. Use `assert_mock` for auto-verification.
-- **Hardcoding fixture IDs** — let Rails auto-generate IDs. Reference associations by name: `sender: alice` not `sender_id: 1`.
-- **Testing multiple concerns in one test** — one test, one assertion concept. Split "validates all fields" into per-field tests.
-- **Not using `assert_no_difference`** — always verify the negative case (invalid params don't create records).
-- **Stubbing implementation details** — test through public interfaces. Use dependency injection over deep stubbing.
-- **Live HTTP in tests** — always use WebMock. Real requests make tests slow, flaky, and environment-dependent.
+- **Forgetting `mock.verify`**
+- **Hardcoding fixture IDs**
+- **Testing multiple concerns in one test**
+- **Not using `assert_no_difference`**
+- **Stubbing implementation details**
+- **Live HTTP in tests**
 
 ## Validation
 
