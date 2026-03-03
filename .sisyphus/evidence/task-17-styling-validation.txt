@@ -1,0 +1,14 @@
+frontmatter ok
+name ok
+description ok
+triggers ok
+when-to-use ok
+principles ok
+gotchas ok
+validation ok
+line count: 346
+line count ok
+0
+no namespace prefix ok
+0
+no superpowers block ok
