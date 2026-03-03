@@ -23,7 +23,7 @@ triggers: # A list of keyword phrases or commands that should activate this skil
 
 ### Forbidden Frontmatter Fields:
 - `allowed-tools`: This field is NOT permitted. Tool access is managed centrally, not per skill.
-- Namespace prefixes (e.g., `rails-ai:models`): Skill `name` and other fields should NOT include namespace prefixes. Use `models` instead of `rails-ai:models`.
+- Namespace prefixes (e.g., `iron-horse:models`): Skill `name` and other fields should NOT include namespace prefixes. Use `models` instead of `iron-horse:models`.
 
 ## Required Sections (in order)
 
@@ -110,5 +110,5 @@ end
 ## Conflict Resolution & Clarifications
 
 - **NO `allowed-tools:` in frontmatter**: This is a key deviation from some external skill formats. Tool permissions are managed globally.
-- **NO namespace prefixes**: Skill names and references should be simple (e.g., `models` instead of `rails-ai:models`).
+- **NO namespace prefixes**: Skill names and references should be simple (e.g., `models` instead of `iron-horse:models`).
 - **NO `<superpowers-integration>` blocks**: This concept is not part of the canonical skill format.

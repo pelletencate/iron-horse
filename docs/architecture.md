@@ -4,7 +4,7 @@
 
 ## Overview
 
-rails-ai uses a two-layer architecture that separates **process** from **domain**:
+Iron Horse uses a two-layer architecture that separates **process** from **domain**:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -28,7 +28,7 @@ rails-ai uses a two-layer architecture that separates **process** from **domain*
                    │
                    ▼
 ┌─────────────────────────────────────────────┐
-│          rails-ai Domain Layer              │
+│          Iron Horse Domain Layer              │
 │          (domain skills)                    │
 │                                             │
 │  - Rails 8 conventions & patterns           │
@@ -36,11 +36,11 @@ rails-ai uses a two-layer architecture that separates **process** from **domain*
 │  - Testing patterns (Minitest, RSpec)        │
 │  - Hotwire / Stimulus / Turbo               │
 │  - Authentication & authorization           │
-│  - Plugin bootstrap (rails-ai.js)           │
+│  - Plugin bootstrap (iron-horse.js)            │
 └─────────────────────────────────────────────┘
 ```
 
-The key insight: **Superpowers already solves orchestration, planning, debugging, and verification.** We do not rebuild any of that. rails-ai focuses purely on encoding Rails domain knowledge as skills.
+The key insight: **Superpowers already solves orchestration, planning, debugging, and verification.** We do not rebuild any of that. Iron Horse focuses purely on encoding Rails domain knowledge as skills.
 
 ---
 
@@ -68,19 +68,19 @@ The key insight: **Superpowers already solves orchestration, planning, debugging
 
 ---
 
-## rails-ai Domain Layer
+## Iron Horse Domain Layer
 
-rails-ai adds **Rails-specific domain knowledge** as skills that compose with Superpowers' process skills. When Superpowers plans a feature, it uses rails-ai skills to understand *how* Rails does things. When it debugs, it uses rails-ai skills to understand Rails-specific error patterns.
+Iron Horse adds **Rails-specific domain knowledge** as skills that compose with Superpowers' process skills. When Superpowers plans a feature, it uses Iron Horse skills to understand *how* Rails does things. When it debugs, it uses Iron Horse skills to understand Rails-specific error patterns.
 
-### What rails-ai Provides
+### What Iron Horse Provides
 
 1. **Skills** — Markdown-based knowledge packages (see [Skills Spec](../specs/skills.md))
    - Rails 8 conventions, patterns, and best practices
    - Adapted from community knowledge + original content
    - Loaded via OpenCode's native `skill` tool
 
-2. **Plugin bootstrap** — `rails-ai.js` (see [Plugins Spec](../specs/plugins.md))
-   - Injects `using-rails-ai/SKILL.md` into system prompt at session start
+2. **Plugin bootstrap** — `iron-horse.js` (see [Plugins Spec](../specs/plugins.md))
+   - Injects `using-iron-horse/SKILL.md` into system prompt at session start
    - Gives the agent baseline Rails awareness before any explicit skill loading
 
 3. **Installation** — `install.sh` script
@@ -91,16 +91,16 @@ rails-ai adds **Rails-specific domain knowledge** as skills that compose with Su
 
 ## Plugin Bootstrap Mechanism
 
-The `rails-ai.js` plugin uses OpenCode's `experimental.chat.system.transform` hook to inject Rails context at session start:
+The `iron-horse.js` plugin uses OpenCode's `experimental.chat.system.transform` hook to inject Rails context at session start:
 
 ```
 Session starts
     │
     ▼
-rails-ai.js plugin fires (system.transform hook)
+iron-horse.js plugin fires (system.transform hook)
     │
     ▼
-Reads using-rails-ai/SKILL.md from skills directory
+Reads using-iron-horse/SKILL.md from skills directory
     │
     ▼
 Strips YAML frontmatter
@@ -130,15 +130,15 @@ Skills are discovered via the filesystem. OpenCode's native `skill` tool finds t
 | 1. Project | `.opencode/skills/` in project root | Project-specific conventions |
 | 2. Personal | `~/.config/opencode/skills/` | User preferences |
 | 3. Superpowers | `~/.config/opencode/skills/superpowers/` (symlinked) | Process skills |
-| 4. rails-ai | `~/.config/opencode/skills/rails-ai/` (symlinked) | Domain skills |
+| 4. Iron Horse | `~/.config/opencode/skills/iron-horse/` (symlinked) | Domain skills |
 
-If a project defines a skill with the same name as a rails-ai skill, the project's version wins. This means projects can override any rails-ai advice with their own conventions.
+If a project defines a skill with the same name as an Iron Horse skill, the project's version wins. This means projects can override any Iron Horse advice with their own conventions.
 
 ---
 
 ## How They Compose
 
-Superpowers process skills and rails-ai domain skills work **independently** — there is no hard coupling between them.
+Superpowers process skills and Iron Horse domain skills work **independently** — there is no hard coupling between them.
 
 **Example: Adding a multi-tenant system**
 
@@ -151,7 +151,7 @@ User: "Add a multi-tenant system with subdomain routing"
 
 2. Superpowers' subagent-driven-development spawns phase agents
 
-3. Each phase agent uses rails-ai domain skills:
+3. Each phase agent uses Iron Horse domain skills:
    → rails-model skill: knows about Current attributes pattern
    → rails-testing skill: knows Minitest conventions
    → Agent's baseline Rails knowledge (from bootstrap plugin)
@@ -162,7 +162,7 @@ User: "Add a multi-tenant system with subdomain routing"
 5. Done
 ```
 
-Neither layer knows about the other's internals. Superpowers doesn't know it's working on Rails; rails-ai doesn't know Superpowers is orchestrating.
+Neither layer knows about the other's internals. Superpowers doesn't know it's working on Rails; Iron Horse doesn't know Superpowers is orchestrating.
 
 ---
 
@@ -218,13 +218,13 @@ Is there a project AGENTS.md?
 │         (only deviations are documented)
 └── No  → Use all defaults (Rails 8, Hotwire, SQLite, Minitest, etc.)
 
-Is there a using-rails-ai/ directory in the project?
-├── Yes → Project has custom rails-ai configuration
-└── No  → Use standard rails-ai skills
+Is there a using-iron-horse/ directory in the project?
+├── Yes → Project has custom Iron Horse configuration
+└── No  → Use standard Iron Horse skills
 
 Does the task need planning?
 ├── Yes → Superpowers' writing-plans + subagent-driven-development handle it
-└── No  → Agent executes directly, using rails-ai skills as needed
+└── No  → Agent executes directly, using Iron Horse skills as needed
 ```
 
 ---

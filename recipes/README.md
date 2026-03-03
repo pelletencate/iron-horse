@@ -1,4 +1,4 @@
-# Rails AI Recipes
+# Iron Horse Recipes
 
 > **Coming in v2** — Pre-built convention-lean plans for common Rails features.
 

@@ -1,13 +1,13 @@
 ---
-name: using-rails-ai
-description: Provides core Rails domain knowledge, architecture patterns, and an overview of available rails-ai skills.
+name: using-iron-horse
+description: Provides core Rails domain knowledge, architecture patterns, and an overview of available iron-horse skills.
 triggers:
-  - "rails-ai"
+  - "iron-horse"
   - "rails"
   - "architecture decision"
 ---
 
-# Using Rails AI
+# Using Iron Horse
 
 This skill provides the foundational Rails domain knowledge for the OpenCode agent, focusing on best practices, common patterns, and architectural guidance within a Rails 8 context. It serves as a bootstrap for understanding how to approach tasks when working with Rails applications.
 
@@ -71,4 +71,4 @@ Where should this code go?
 
 ## Superpowers Reminder
 
-Remember that Superpowers handles general process (e.g., brainstorming, TDD methodology, debugging process, code review, verification). Load `rails-ai` skills for deep Rails domain knowledge specific to the task at hand.
+Remember that Superpowers handles general process (e.g., brainstorming, TDD methodology, debugging process, code review, verification). Load `iron-horse` skills for deep Rails domain knowledge specific to the task at hand.

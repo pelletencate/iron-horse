@@ -11,12 +11,12 @@ function extractAndStripFrontmatter(content) {
 }
 
 function getBootstrapContent() {
-  const skillPath = join(__dirname, '../../skills/using-rails-ai/SKILL.md');
+  const skillPath = join(__dirname, '../../skills/using-iron-horse/SKILL.md');
   const raw = readFileSync(skillPath, 'utf8');
   return extractAndStripFrontmatter(raw);
 }
 
-export default function RailsAIPlugin({ client, directory }) {
+export default function IronHorsePlugin({ client, directory }) {
   return {
     experimental: {
       chat: {

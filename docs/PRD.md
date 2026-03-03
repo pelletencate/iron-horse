@@ -1,4 +1,4 @@
-# Rails AI Workspace - Product Requirements Document
+# Iron Horse Workspace - Product Requirements Document
 
 > Living document. Last updated: 2026-03-03
 
@@ -67,9 +67,9 @@ The workspace assumes a **default stack** unless the project's `AGENTS.md` says 
 
 ## Core Concepts
 
-### 1. Plugin: `rails-ai.js` Bootstrap
+### 1. Plugin: `iron-horse.js` Bootstrap
 
-The plugin is the entry point that gives the agent Rails awareness. It uses OpenCode's `experimental.chat.system.transform` hook to inject the `using-rails-ai/SKILL.md` content into the system prompt at session start.
+The plugin is the entry point that gives the agent Rails awareness. It uses OpenCode's `experimental.chat.system.transform` hook to inject the `using-iron-horse/SKILL.md` content into the system prompt at session start.
 
 - **What it does**: Reads the bootstrap skill, strips YAML frontmatter, pushes content to `output.system`
 - **What it does NOT do**: Auto-load all skills, define custom tools, or modify agent behavior beyond context injection
@@ -83,14 +83,14 @@ Skills are packaged units of Rails knowledge — markdown files that teach the a
 
 - **Format**: Directory with `SKILL.md` + optional examples/scripts (see [Skills Spec](../specs/skills.md))
 - **Discovery**: Filesystem-based via OpenCode's native `skill` tool
-- **Priority**: Project skills > Personal skills > Superpowers skills > rails-ai skills
+- **Priority**: Project skills > Personal skills > Superpowers skills > iron-horse skills
 - **Content**: Mix of adapted community knowledge and original content
 
 ### 3. Superpowers Integration: Process Layer
 
-[Superpowers](https://github.com/obra/superpowers) provides the process layer — everything about *how* to work. rails-ai provides the domain layer — everything about *what* Rails convention expects.
+[Superpowers](https://github.com/obra/superpowers) provides the process layer — everything about *how* to work. iron-horse provides the domain layer — everything about *what* Rails convention expects.
 
-| Superpowers Provides | rails-ai Provides |
+| Superpowers Provides | iron-horse Provides |
 |----------------------|-------------------|
 | Planning & decomposition | Rails conventions & patterns |
 | Sub-agent orchestration | Model/controller/view knowledge |
@@ -99,7 +99,7 @@ Skills are packaged units of Rails knowledge — markdown files that teach the a
 | Code review process | Hotwire / Stimulus / Turbo guidance |
 | Verification before completion | Authentication & authorization patterns |
 
-The two layers compose without hard coupling. Superpowers doesn't know it's working on Rails; rails-ai doesn't know Superpowers is orchestrating.
+The two layers compose without hard coupling. Superpowers doesn't know it's working on Rails; iron-horse doesn't know Superpowers is orchestrating.
 
 See [Architecture](./architecture.md) for the full two-layer design.
 
@@ -118,7 +118,7 @@ User: "Add a multi-tenant system with subdomain routing"
    - Phase 3: Scoping queries to current tenant
    - Phase 4: Tests
 2. Superpowers' subagent-driven-development executes each phase
-3. Each phase agent uses rails-ai skills for Rails-specific guidance
+3. Each phase agent uses iron-horse skills for Rails-specific guidance
 4. Superpowers' verification-before-completion validates the result
 ```
 
@@ -133,7 +133,7 @@ User: "Add a cached_full_name method to the User model"
 4. Done
 ```
 
-### Debugging (Superpowers Process + rails-ai Domain)
+### Debugging (Superpowers Process + iron-horse Domain)
 
 ```
 User: "Why is this N+1 happening in the orders index?"

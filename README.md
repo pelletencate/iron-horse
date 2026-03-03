@@ -1,26 +1,26 @@
-# Rails AI — OpenCode Plugin + Skill Pack for Rails 8
+# Iron Horse — OpenCode Plugin + Skill Pack for Rails 8
 
 > Deep Rails 8 domain intelligence layered on top of [Superpowers](https://github.com/obra/superpowers) process workflows.
 
 ## What This Is
 
-Rails AI is an OpenCode plugin and skill pack that gives AI agents deep Rails 8 domain knowledge. It ships 23 domain skills covering everything from migrations to WebSockets, plus a bootstrap plugin that loads core context at session start.
+Iron Horse is an OpenCode plugin and skill pack that gives AI agents deep Rails 8 domain knowledge. It ships 23 domain skills covering everything from migrations to WebSockets, plus a bootstrap plugin that loads core context at session start.
 
-Superpowers handles the process layer (TDD methodology, debugging loops, code review, planning). Rails AI handles the domain layer — the Rails-specific patterns, conventions, and gotchas that generic models don't know well.
+Superpowers handles the process layer (TDD methodology, debugging loops, code review, planning). Iron Horse handles the domain layer — the Rails-specific patterns, conventions, and gotchas that generic models don't know well.
 
 ## Quick Install
 
 ```sh
-git clone https://github.com/your-org/rails-ai.git
-cd rails-ai
+git clone https://github.com/your-org/iron-horse.git
+cd iron-horse
 bash install.sh
 ```
 
-`install.sh` clones Superpowers, symlinks the plugin into your OpenCode plugins directory, and symlinks all skills into your OpenCode skills directory. After install, OpenCode loads `using-rails-ai` automatically at every session start.
+`install.sh` clones Superpowers, symlinks the plugin into your OpenCode plugins directory, and symlinks all skills into your OpenCode skills directory. After install, OpenCode loads `using-iron-horse` automatically at every session start.
 
 ## Default Stack
 
-Rails AI assumes this stack unless you say otherwise:
+Iron Horse assumes this stack unless you say otherwise:
 
 | Layer | Choice |
 |---|---|
@@ -36,9 +36,9 @@ Rails AI assumes this stack unless you say otherwise:
 
 ## How It Works
 
-1. **Session start** — the `using-rails-ai` plugin bootstraps core Rails domain context automatically.
+1. **Session start** — the `using-iron-horse` plugin bootstraps core Rails domain context automatically.
 2. **On-demand skills** — individual skills load via OpenCode's native `skill` tool (e.g., `skill("hotwire")`). Each skill provides deep, focused guidance for its domain.
-3. **Process layer** — Superpowers handles TDD, debugging loops, code review, and planning workflows. Rails AI skills slot in alongside Superpowers, not replacing it.
+3. **Process layer** — Superpowers handles TDD, debugging loops, code review, and planning workflows. Iron Horse skills slot in alongside Superpowers, not replacing it.
 
 ## Skill Catalog
 
@@ -66,7 +66,7 @@ Rails AI assumes this stack unless you say otherwise:
 | `solid-stack` | Use when setting up background jobs, caching, or WebSockets — SolidQueue, SolidCache, SolidCable (never Sidekiq/Redis) |
 | `styling` | Style Rails views with Tailwind CSS utilities, DaisyUI components, and theme-aware responsive design |
 | `testing` | Test Rails applications with Minitest — models, controllers, jobs, mailers, fixtures, mocking, and test helpers |
-| `using-rails-ai` | Provides core Rails domain knowledge, architecture patterns, and an overview of available rails-ai skills |
+| `using-iron-horse` | Provides core Rails domain knowledge, architecture patterns, and an overview of available iron-horse skills |
 | `views` | Build Rails views with partials, layouts, helpers, forms, nested forms, and WCAG 2.1 AA accessibility |
 | `writing-plans` | Write convention-lean implementation plans that trust the executor's Rails knowledge by focusing on what and why, not how |
 
@@ -82,7 +82,7 @@ Load `writing-plans` when you need a plan written this way.
 
 This project adapts domain skills from two MIT-licensed repositories. See [ATTRIBUTION.md](ATTRIBUTION.md) for full details.
 
-- [zerobearing2/rails-ai](https://github.com/zerobearing2/rails-ai) — 12 adapted domain skills
+- [zerobearing2/iron-horse](https://github.com/zerobearing2/iron-horse) — 12 adapted domain skills
 - [ThibautBaissac/rails_ai_agents](https://github.com/ThibautBaissac/rails_ai_agents) — 8 adapted domain skills
 
 ## License

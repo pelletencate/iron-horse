@@ -179,7 +179,7 @@ When writing a new plan, use this exact structure:
 
 ## Gotchas
 
-- **Missing domain skills**: Sparse plans only work if the executing agent loads domain skills. Ensure the `using-rails-ai` baseline is active or explicitly instruct the executor to use Rails conventions.
+- **Missing domain skills**: Sparse plans only work if the executing agent loads domain skills. Ensure the `using-iron-horse` baseline is active or explicitly instruct the executor to use Rails conventions.
 - **Confusing "convention-lean" with "no plan"**: Authorization rules and edge cases are ALWAYS required. Do not skip them just because the plan is "lean".
 - **Under-specifying integrations**: Plans for external integrations (Stripe, OAuth, 3rd party APIs) need MORE detail, not less. Do not assume convention here, as external APIs have no standard convention. For example, explicitly plan out the webhook verification strategy.
 - **Implicit state machines**: State machine logic and complex transitions always need explicit documentation and planning. Do not assume the executor will guess the correct state flow or side-effects of a state transition.

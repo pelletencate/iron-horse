@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-# Determine rails-ai source directory (absolute path of where install.sh lives)
-RAILS_AI_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Determine iron-horse source directory (absolute path of where install.sh lives)
+IRON_HORSE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Setup directories
 mkdir -p "$HOME/.config/opencode/plugins"
@@ -26,18 +26,18 @@ ln -sf "$SUPERPOWERS_DIR/.opencode/plugins/superpowers.js" \
 ln -sfn "$SUPERPOWERS_DIR/skills" \
   "$HOME/.config/opencode/skills/superpowers"
 
-# Symlink rails-ai plugin
-ln -sf "$RAILS_AI_DIR/.opencode/plugins/rails-ai.js" \
-  "$HOME/.config/opencode/plugins/rails-ai.js"
+# Symlink iron-horse plugin
+ln -sf "$IRON_HORSE_DIR/.opencode/plugins/iron-horse.js" \
+  "$HOME/.config/opencode/plugins/iron-horse.js"
 
-# Symlink rails-ai skills
-ln -sfn "$RAILS_AI_DIR/skills" \
-  "$HOME/.config/opencode/skills/rails-ai"
+# Symlink iron-horse skills
+ln -sfn "$IRON_HORSE_DIR/skills" \
+  "$HOME/.config/opencode/skills/iron-horse"
 
 echo ""
-echo "rails-ai installation complete!"
+echo "iron-horse installation complete!"
 echo ""
 echo "Installed:"
 echo "  Superpowers: $SUPERPOWERS_DIR"
-echo "  Plugin: $HOME/.config/opencode/plugins/rails-ai.js"
-echo "  Skills: $HOME/.config/opencode/skills/rails-ai"
+echo "  Plugin: $HOME/.config/opencode/plugins/iron-horse.js"
+echo "  Skills: $HOME/.config/opencode/skills/iron-horse"
