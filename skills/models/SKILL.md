@@ -322,6 +322,45 @@ Feedback.eager_load(:recipient, :tags)     # LEFT OUTER JOIN (when filtering on 
 Feedback.includes(recipient: :profile)     # Nested associations
 ```
 
+## State as Records
+
+# State as Records — model closures, published states, etc.
+# Treat state changes as records, not boolean flags
+class Post < ApplicationRecord
+  has_many :closures
+  
+  def closed?
+    closures.exists?
+  end
+  
+  def close!(user:)
+    closures.create!(user:)
+  end
+end
+
+class Closure < ApplicationRecord
+  belongs_to :post
+  belongs_to :user
+end
+# Routes: resource :closure, only: [:create, :destroy]
+# This pattern from 37signals: state transitions become auditable records with CRUD routing
+
+## .then Query Chaining
+
+# .then for chainable query objects
+class PostQuery
+  def self.call(scope = Post.all)
+    scope
+  end
+  
+  def self.published(scope = Post.all)
+    scope.where(published: true)
+  end
+end
+
+# Chain with .then:
+Post.all.then { |s| params[:published] ? s.where(published: true) : s }
+
 ## Gotchas
 
 - **Never use `default_scope`** — it silently affects all queries, associations, and `count`. Use explicit named scopes instead.
