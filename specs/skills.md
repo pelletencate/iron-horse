@@ -1,5 +1,7 @@
 # Skills Specification
 
+> **The canonical format reference for all `SKILL.md` files is located at `specs/skill-format-reference.md`.**
+
 > Living document. Last updated: 2026-03-01
 
 ## What is a Skill?
