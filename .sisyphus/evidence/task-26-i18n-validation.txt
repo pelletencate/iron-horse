@@ -1,0 +1,8 @@
+frontmatter ok
+name ok
+description ok
+0
+no allowed-tools ok
+line count: 398
+line count ok
+content ok
