@@ -1,0 +1,35 @@
+{
+  "name": "iron-horse",
+  "version": "1.0.0",
+  "description": "Deep Rails 8 domain intelligence for AI coding agents — 23 skills for OpenCode",
+  "type": "module",
+  "main": "./plugin.js",
+  "exports": {
+    ".": "./plugin.js"
+  },
+  "bin": {
+    "iron-horse": "./cli.js"
+  },
+  "files": [
+    "plugin.js",
+    "cli.js",
+    "skills/"
+  ],
+  "keywords": [
+    "opencode",
+    "rails",
+    "rails-8",
+    "hotwire",
+    "ruby",
+    "ai",
+    "domain-skills",
+    "plugin"
+  ],
+  "author": "Pelle",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pelletencate/iron-horse.git"
+  },
+  "homepage": "https://github.com/pelletencate/iron-horse#readme"
+}
