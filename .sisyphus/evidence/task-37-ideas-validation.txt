@@ -1,0 +1,7 @@
+IDEAS.md exists
+item count: 39
+min items ok
+payments ok
+deployment ok
+viewcomponent ok
+brainstorm superseded ok

@@ -6,7 +6,7 @@
 
 - [x] **Convention Over Specification** — Plans should be terse because Rails conventions eliminate boilerplate. The planner says *what* and *why*, never *how*. Executor already knows Rails. *(Added to PRD + architecture.md)*
 - [x] **Default Stack in AGENTS.md** — Define a sensible default stack (Rails 8, Hotwire, Solid stack, SQLite) so AGENTS.md only documents deviations. *(Added to AGENTS.md + PRD)*
-- [x] **Brainstorm command / skill** — Superseded by Superpowers' `brainstorming` skill, which provides agent-driven discovery with structured output.
+- [x] ~~Brainstorm command / skill~~ — superseded by Superpowers' `brainstorming` skill, which provides agent-driven discovery with structured output.
 - [x] **Two-layer architecture** — Superpowers handles process (planning, orchestration, debugging, verification); rails-ai handles domain (Rails knowledge, skills, plugin bootstrap). *(Added to architecture.md)*
 
 ## Under Consideration
@@ -59,6 +59,8 @@
 - [ ] **ViewComponent skill** — Component-based view architecture with ViewComponent gem. When to use components vs. partials, testing patterns, slots, previews.
 
 - [ ] **Pundit/authorization skill** — Authorization patterns with Pundit: policies, scopes, controller integration, testing authorization rules. Covers both Pundit and Action Policy.
+- [ ] **Devise Migration Guide** — For teams migrating from Devise to Rails 8 native auth
+- [ ] **Multi-tenancy Patterns** — Row-level security, ActsAsTenant, apartment gem alternatives
 
 ### Quality & Evaluation
 
