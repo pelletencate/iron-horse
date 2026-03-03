@@ -4,13 +4,13 @@
 
 ## Vision
 
-An opencode workspace purpose-built for Ruby on Rails development. It layers Rails-specific domain knowledge (skills + plugin) on top of [Superpowers](https://github.com/obra/superpowers)' process capabilities (planning, orchestration, debugging, verification).
+An opencode workspace purpose-built for Ruby on Rails development. It layers Rails-specific domain knowledge (skills + plugin) on top of your agent harness's process capabilities (planning, orchestration, debugging, verification).
 
 ## Goals
 
 - **Rails-native intelligence**: Deep understanding of Rails conventions, patterns, and ecosystem
 - **Composable skills**: Modular, reusable skills that encode Rails best practices
-- **Superpowers integration**: Leverage existing process layer — planning, orchestration, TDD, debugging — without rebuilding it
+- **Process layer integration**: Work with your existing agent harness (oh-my-opencode, Superpowers, or compatible) — planning, orchestration, TDD, debugging — without rebuilding it
 - **Convention over specification**: Plans are terse because Rails conventions eliminate boilerplate
 
 ## Core Principle: Convention Over Specification
@@ -83,15 +83,15 @@ Skills are packaged units of Rails knowledge — markdown files that teach the a
 
 - **Format**: Directory with `SKILL.md` + optional examples/scripts (see [Skills Spec](../specs/skills.md))
 - **Discovery**: Filesystem-based via OpenCode's native `skill` tool
-- **Priority**: Project skills > Personal skills > Superpowers skills > iron-horse skills
+   - **Priority**: Project skills > Personal skills > Process layer skills > iron-horse skills
 - **Content**: Mix of adapted community knowledge and original content
 
-### 3. Superpowers Integration: Process Layer
+### 3. Process Layer Integration
 
-[Superpowers](https://github.com/obra/superpowers) provides the process layer — everything about *how* to work. iron-horse provides the domain layer — everything about *what* Rails convention expects.
+Iron Horse works with your existing agent harness. It provides the domain layer — everything about *what* Rails convention expects. The process layer (oh-my-opencode, Superpowers, or similar) provides everything about *how* to work.
 
-| Superpowers Provides | iron-horse Provides |
-|----------------------|-------------------|
+| Process Layer Provides | iron-horse Provides |
+|------------------------|---------------------|
 | Planning & decomposition | Rails conventions & patterns |
 | Sub-agent orchestration | Model/controller/view knowledge |
 | TDD methodology | Testing patterns (Minitest, RSpec) |
@@ -99,7 +99,11 @@ Skills are packaged units of Rails knowledge — markdown files that teach the a
 | Code review process | Hotwire / Stimulus / Turbo guidance |
 | Verification before completion | Authentication & authorization patterns |
 
-The two layers compose without hard coupling. Superpowers doesn't know it's working on Rails; iron-horse doesn't know Superpowers is orchestrating.
+The two layers compose without hard coupling. The process layer doesn't know it's working on Rails; iron-horse doesn't know what harness is orchestrating.
+
+**oh-my-opencode users**: Iron Horse registers as an OmO plugin. Skills are auto-discovered — no Superpowers install needed.
+
+**Vanilla OpenCode users**: Iron Horse installs alongside [Superpowers](https://github.com/obra/superpowers), which provides the process layer via symlinked skills.
 
 See [Architecture](./architecture.md) for the full two-layer design.
 
@@ -107,19 +111,19 @@ See [Architecture](./architecture.md) for the full two-layer design.
 
 ## User Workflows
 
-### Big Feature (Superpowers-Orchestrated)
+### Big Feature (Process Layer-Orchestrated)
 
 ```
 User: "Add a multi-tenant system with subdomain routing"
 
-1. Superpowers' writing-plans skill decomposes into phases:
+1. The process layer decomposes into phases:
    - Phase 1: Tenant model + migration
    - Phase 2: Subdomain routing middleware
    - Phase 3: Scoping queries to current tenant
    - Phase 4: Tests
-2. Superpowers' subagent-driven-development executes each phase
+2. The process layer executes each phase (via sub-agents or sequentially)
 3. Each phase agent uses iron-horse skills for Rails-specific guidance
-4. Superpowers' verification-before-completion validates the result
+4. The process layer validates the result before declaring done
 ```
 
 ### Small Task (Direct Execution)
@@ -133,15 +137,15 @@ User: "Add a cached_full_name method to the User model"
 4. Done
 ```
 
-### Debugging (Superpowers Process + iron-horse Domain)
+### Debugging (Process Layer + iron-horse Domain)
 
 ```
 User: "Why is this N+1 happening in the orders index?"
 
-1. Superpowers' systematic-debugging skill structures the investigation
+1. The process layer structures the investigation
 2. Agent uses Rails knowledge to identify eager loading patterns
 3. Traces the query chain, applies fix (includes/preload)
-4. Superpowers' verification-before-completion confirms fix works
+4. The process layer confirms fix works before closing
 ```
 
 ---
@@ -158,19 +162,19 @@ User: "Why is this N+1 happening in the orders index?"
 
 ## Resolved Questions
 
-These questions from the original design have been resolved by adopting Superpowers:
+These questions from the original design have been resolved by adopting a pluggable process layer:
 
 | Question | Resolution |
 |----------|------------|
-| How should the orchestrator handle failures mid-plan? | Superpowers' `systematic-debugging` + `verification-before-completion` skills handle this. Retry, debug, or ask user. |
+| How should the orchestrator handle failures mid-plan? | The process layer (Superpowers' `systematic-debugging` + `verification-before-completion`, or OmO equivalents) handles this. Retry, debug, or ask user. |
 | Should skills be versioned per Rails version (6, 7, 8)? | Not for v1. Skills target Rails 8. Version-specific skills can be added in v2 if needed. |
 | How to detect and adapt to project-specific conventions? | The Skill Adaptation pattern in [Skills Spec](../specs/skills.md) — skills include decision trees that inspect the project. |
-| Should there be a "dry run" mode for the orchestrator? | Not for v1. Superpowers' planning phase serves as a preview; execution can be paused between phases. |
+| Should there be a "dry run" mode for the orchestrator? | Not for v1. The process layer's planning phase serves as a preview; execution can be paused between phases. |
 | How to handle gems that change Rails behavior? | Skills include gem-aware decision trees (e.g., "if Devise is present, do X; otherwise use has_secure_password"). |
-| How should the planner work? | Superpowers' `writing-plans` skill handles plan creation. |
-| How to persist plan state across sessions? | Superpowers handles plan state management. |
-| How to handle sub-agents? | Superpowers' `subagent-driven-development` skill manages sub-agent spawning. |
-| Should routing be LLM-based or heuristic-based? | Superpowers handles task routing — we don't need a custom router. |
+| How should the planner work? | The process layer handles plan creation (Superpowers' `writing-plans` skill for vanilla OpenCode; OmO's built-in planning for OmO users). |
+| How to persist plan state across sessions? | The process layer handles plan state management. |
+| How to handle sub-agents? | The process layer manages sub-agent spawning. |
+| Should routing be LLM-based or heuristic-based? | The process layer handles task routing — we don't need a custom router. |
 
 ---
 

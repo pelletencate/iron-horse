@@ -66,9 +66,9 @@ Where should this code go?
 - `form-objects`: ActiveModel::API form objects, multi-model forms
 - `caching-strategies`: Fragment caching, Russian doll, SolidCache
 - `architecture`: Decision trees, code organization, layer interactions
-- `writing-plans`: Convention-lean planning (overrides Superpowers default)
+- `writing-plans`: Convention-lean planning for Rails projects
 - `frame-problem`: XY-problem detection before feature work
 
-## Superpowers Reminder
+## Process vs Domain
 
-Remember that Superpowers handles general process (e.g., brainstorming, TDD methodology, debugging process, code review, verification). Load `iron-horse` skills for deep Rails domain knowledge specific to the task at hand.
+Iron Horse provides **domain** skills — Rails-specific knowledge. Your agent harness (oh-my-opencode, Superpowers, or equivalent) handles **process** — planning, TDD, debugging, code review, verification. Load `iron-horse` skills for deep Rails domain knowledge specific to the task at hand.

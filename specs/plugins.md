@@ -4,7 +4,7 @@
 
 ## What is a Plugin?
 
-In the iron-horse context, a plugin is a JavaScript ES module that uses OpenCode's plugin hooks to inject context or modify behavior at runtime. The primary plugin is `iron-horse.js`, which bootstraps Rails awareness into the agent's system prompt.
+In the iron-horse context, a plugin is a JavaScript ES module that uses OpenCode's plugin hooks to inject context or modify behavior at runtime. The primary plugin is `plugin.js`, which bootstraps Rails awareness into the agent's system prompt.
 
 ## Plugin vs Skill
 
@@ -18,13 +18,12 @@ In the iron-horse context, a plugin is a JavaScript ES module that uses OpenCode
 
 ## The iron-horse Plugin
 
-### File Location
+### Distribution
 
-```
-.opencode/plugins/iron-horse.js
-```
+Iron Horse is published to npm as `iron-horse`. The package serves two roles:
 
-Installed via symlink to `~/.config/opencode/plugins/iron-horse.js`.
+1. **Plugin** — `plugin.js` is the entry point OpenCode imports at runtime
+2. **CLI** — `bunx iron-horse install` configures your `opencode.json`
 
 ### Hook: `experimental.chat.system.transform`
 
@@ -32,7 +31,7 @@ The plugin registers a single hook — `experimental.chat.system.transform` — 
 
 ### What It Does
 
-1. Locates the `using-iron-horse/SKILL.md` file in the skills directory
+1. Locates the `using-iron-horse/SKILL.md` file in the package's `skills/` directory
 2. Reads the file content
 3. Strips YAML frontmatter (the `---` delimited header)
 4. Pushes the remaining content to `output.system`
@@ -45,71 +44,75 @@ This gives the agent baseline Rails awareness before any explicit skill loading 
 - **Does not define custom tools** — the plugin only injects context; it doesn't add new tools or commands.
 - **Does not modify agent behavior** beyond injecting the bootstrap content into the system prompt.
 
-### Implementation Pattern
-
-The plugin follows the same pattern as the [Superpowers plugin](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js):
+### Implementation
 
 ```javascript
-import path from 'path';
-import fs from 'fs';
+import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-export const IronHorsePlugin = async ({ client, directory }) => {
-  // Locate using-iron-horse/SKILL.md
-  // Read and strip frontmatter
-  // Return hook registration
+function stripFrontmatter(content) {
+  return content.replace(/^---[\s\S]*?---\n/, '');
+}
 
+function getBootstrapContent() {
+  const skillPath = join(__dirname, 'skills', 'using-iron-horse', 'SKILL.md');
+  const raw = readFileSync(skillPath, 'utf8');
+  return stripFrontmatter(raw);
+}
+
+export default function IronHorsePlugin({ client, directory }) {
   return {
-    name: "iron-horse",
+    name: 'iron-horse',
     hooks: {
-      "experimental.chat.system.transform": async (input, output) => {
-        // Push bootstrap content to output.system
-      }
-    }
+      'experimental.chat.system.transform': async (input, output) => {
+        const content = getBootstrapContent();
+        output.system.push(content);
+      },
+    },
   };
-};
+}
 ```
 
-## Plugin Discovery
+## Skill Discovery
 
-OpenCode discovers plugins from the filesystem:
+Skills are served via OpenCode's `skills.urls` mechanism. The `skills/index.json` manifest in the repo lists all 23 skills with their names, descriptions, and files. OpenCode fetches and caches these at startup.
+
+The skills URL points to the GitHub-hosted raw content:
 
 ```
-~/.config/opencode/plugins/
-├── superpowers.js    → symlink to superpowers repo
-└── iron-horse.js      → symlink to iron-horse repo
+https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/
 ```
 
-Plugins are JavaScript ES modules that export an async factory function.
+OpenCode reads `index.json` from that URL, then downloads each skill's `SKILL.md` into its local cache.
 
 ## Installation
 
-The `install.sh` script handles plugin installation:
-
-1. Symlinks `iron-horse.js` into `~/.config/opencode/plugins/`
-2. Symlinks the `skills/` directory into `~/.config/opencode/skills/iron-horse/`
-3. No `opencode.json` configuration file is needed
-
-```bash
-# What install.sh does:
-mkdir -p ~/.config/opencode/plugins
-ln -s /path/to/iron-horse/.opencode/plugins/iron-horse.js ~/.config/opencode/plugins/iron-horse.js
-
-mkdir -p ~/.config/opencode/skills
-ln -s /path/to/iron-horse/skills ~/.config/opencode/skills/iron-horse
+```sh
+bunx iron-horse install
 ```
 
-## Relationship to Superpowers Plugin
+This adds two entries to the project's `opencode.json`:
 
-iron-horse's plugin follows the same architecture as Superpowers' plugin:
+```json
+{
+  "plugin": ["iron-horse"],
+  "skills": {
+    "urls": ["https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/"]
+  }
+}
+```
 
-| Aspect | Superpowers Plugin | iron-horse Plugin |
-|--------|-------------------|-----------------|
-| Bootstrap skill | `using-superpowers/SKILL.md` | `using-iron-horse/SKILL.md` |
-| Hook | `experimental.chat.system.transform` | `experimental.chat.system.transform` |
-| Skills directory | `~/.config/opencode/skills/superpowers/` | `~/.config/opencode/skills/iron-horse/` |
-| Purpose | Process awareness | Rails domain awareness |
+- `plugin` — tells OpenCode to install `iron-horse` from npm and load its plugin hooks
+- `skills.urls` — tells OpenCode to fetch the skill catalog from GitHub and make them available via the `skill` tool
 
-Both plugins can run simultaneously — they each inject their own context into the system prompt.
+### Local Development
+
+For development, the `.opencode/plugins/iron-horse.js` file provides the same plugin behavior but resolves skills relative to the repo root. This fires automatically when running OpenCode from the iron-horse repo directory.
+
+## Relationship to Process Layer
+
+Iron Horse provides **domain** skills only. The process layer (planning, TDD, debugging, orchestration) comes from your agent harness. Iron Horse skills compose with any process layer — there is no hard coupling.
