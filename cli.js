@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const PACKAGE_NAME = 'iron-horse';
+const PACKAGE_NAME = 'iron-horse-opencode';
 const SKILLS_URL = 'https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/';
 
 const args = process.argv.slice(2);

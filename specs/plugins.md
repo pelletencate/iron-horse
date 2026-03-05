@@ -20,10 +20,10 @@ In the iron-horse context, a plugin is a JavaScript ES module that uses OpenCode
 
 ### Distribution
 
-Iron Horse is published to npm as `iron-horse`. The package serves two roles:
+Iron Horse is published to npm as `iron-horse-opencode`. The package serves two roles:
 
 1. **Plugin** — `plugin.js` is the entry point OpenCode imports at runtime
-2. **CLI** — `bunx iron-horse install` configures your `opencode.json`
+2. **CLI** — `bunx iron-horse-opencode install` configures your `opencode.json`
 
 ### Hook: `experimental.chat.system.transform`
 
@@ -66,7 +66,7 @@ function getBootstrapContent() {
 
 export default function IronHorsePlugin({ client, directory }) {
   return {
-    name: 'iron-horse',
+    name: 'iron-horse-opencode',
     hooks: {
       'experimental.chat.system.transform': async (input, output) => {
         const content = getBootstrapContent();
@@ -92,21 +92,21 @@ OpenCode reads `index.json` from that URL, then downloads each skill's `SKILL.md
 ## Installation
 
 ```sh
-bunx iron-horse install
+bunx iron-horse-opencode install
 ```
 
 This adds two entries to the project's `opencode.json`:
 
 ```json
 {
-  "plugin": ["iron-horse"],
+  "plugin": ["iron-horse-opencode"],
   "skills": {
     "urls": ["https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/"]
   }
 }
 ```
 
-- `plugin` — tells OpenCode to install `iron-horse` from npm and load its plugin hooks
+- `plugin` — tells OpenCode to install `iron-horse-opencode` from npm and load its plugin hooks
 - `skills.urls` — tells OpenCode to fetch the skill catalog from GitHub and make them available via the `skill` tool
 
 ### Local Development

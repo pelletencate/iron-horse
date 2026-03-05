@@ -17,7 +17,7 @@ function getBootstrapContent() {
 
 export default function IronHorsePlugin({ client, directory }) {
   return {
-    name: 'iron-horse',
+    name: 'iron-horse-opencode',
     hooks: {
       'experimental.chat.system.transform': async (input, output) => {
         const content = getBootstrapContent();

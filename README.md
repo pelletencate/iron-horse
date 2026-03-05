@@ -11,12 +11,12 @@ Your agent harness (oh-my-opencode, Superpowers, or any compatible process layer
 ## Quick Install
 
 ```sh
-bunx iron-horse install
+bunx iron-horse-opencode install
 ```
 
 That's it. This adds two entries to your `opencode.json`:
 
-- `"iron-horse"` in the `plugin` array (bootstrap prompt injection)
+- `"iron-horse-opencode"` in the `plugin` array (bootstrap prompt injection)
 - A `skills.urls` entry pointing to the skill catalog on GitHub (23 on-demand skills)
 
 After install, OpenCode loads `using-iron-horse` automatically at every session start.
@@ -27,7 +27,7 @@ If you prefer, add these to your `opencode.json` by hand:
 
 ```json
 {
-  "plugin": ["iron-horse"],
+  "plugin": ["iron-horse-opencode"],
   "skills": {
     "urls": ["https://raw.githubusercontent.com/pelletencate/iron-horse/main/skills/"]
   }
@@ -37,7 +37,7 @@ If you prefer, add these to your `opencode.json` by hand:
 ### Uninstall
 
 ```sh
-bunx iron-horse uninstall
+bunx iron-horse-opencode uninstall
 ```
 
 ## Default Stack
